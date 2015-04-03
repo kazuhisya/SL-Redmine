@@ -37,7 +37,7 @@ yum -y install ruby ruby-devel rubygems rubygem-bundler
 
 
 ## mariadb settings
-mv /etc/my.cnf /tmp/my.cnf
+mv /etc/my.cnf /etc/my.cnf.org
 curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/mariadb-my.cnf
 mv mariadb-my.cnf /etc/my.cnf
 
@@ -87,6 +87,10 @@ EOF
 cp /var/lib/redmine/config/configuration.yml.example /var/lib/redmine/config/configuration.yml
 sed -i -e 's/  rmagick_font_path:/  rmagick_font_path: \/usr\/share\/fonts\/ipa-pgothic\/ipagp.ttf/' /var/lib/redmine/config/configuration.yml
 
+curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/redmine-config.ru
+mv /var/lib/redmine/config.ru /tmp/config.ru
+mv redmine-config.ru /var/lib/redmine/config.ru
+
 ## Redmine Install
 cd /var/lib/redmine
 echo "gem \"unicorn\"" > Gemfile.local
@@ -119,7 +123,7 @@ PIDFile=/var/lib/redmine/tmp/pids/unicorn.pid
 User=root
 Group=root
 
-ExecStart=/root/.gem/ruby/bin/bundle exec "unicorn_rails -c config/unicorn.rb -E production"
+ExecStart=/root/.gem/ruby/bin/bundle exec "unicorn_rails -c config/unicorn.rb -E production --path /redmine"
 ExecStop=/usr/bin/kill -QUIT \$MAINPID
 ExecReload=/bin/kill -USR2 \$MAINPID
 
@@ -151,8 +155,11 @@ sysctl -p
 ## Install Nginx and AB tools
 yum install -y nginx
 
+sed -i 's/worker_processes  1;/worker_processes  auto;/' /etc/nginx/nginx.conf
 curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/nginx-redmine.conf
 mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.org
 mv nginx-redmine.conf /etc/nginx/conf.d/redmine.conf
+ln -s /var/lib/redmine/public /usr/share/nginx/html/redmine
+
 systemctl enable nginx.service
 systemctl start nginx.service
