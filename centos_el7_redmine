@@ -33,7 +33,7 @@ yum -y groupinstall "Development Tools"
 ## for Redmine
 yum -y install openssl-devel readline-devel zlib-devel curl-devel libyaml-devel libffi-devel
 yum -y install ImageMagick ImageMagick-devel ipa-pgothic-fonts
-yum -y install ruby ruby-devel rubygems rubygem-bundler
+yum -y install ruby ruby-devel rubygems
 
 
 ## mariadb settings
