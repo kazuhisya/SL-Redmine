@@ -65,7 +65,7 @@ echo $PASS > /root/db_password.txt
 ## Ruby Gems
 echo "gem: --no-ri --no-rdoc --user-install" > /root/.gemrc
 echo "export PATH=\"\$HOME/.gem/ruby/bin:\$PATH\"" >> /root/.bashrc
-source /root/.bashrc
+export PATH="$HOME/.gem/ruby/bin:$PATH"
 gem install bundler
 
 ## Redmine Download
@@ -88,6 +88,7 @@ cp /var/lib/redmine/config/configuration.yml.example /var/lib/redmine/config/con
 sed -i -e 's/  rmagick_font_path:/  rmagick_font_path: \/usr\/share\/fonts\/ipa-pgothic\/ipagp.ttf/' /var/lib/redmine/config/configuration.yml
 
 ## Redmine Install
+cd /var/lib/redmine
 echo "gem \"unicorn\"" > Gemfile.local
 bundle install --without development test --path vendor/bundle
 bundle exec rake generate_secret_token
@@ -101,7 +102,7 @@ pid "/var/lib/redmine/tmp/pids/unicorn.pid"
 stderr_path "/var/lib/redmine/log/unicorn.log"
 stdout_path "/var/lib/redmine/log/unicorn.log"
 
-listen "tmp/sockets/unicorn.sock"
+listen "/var/lib/redmine/tmp/sockets/unicorn.sock"
 worker_processes 2
 timeout 30
 EOF
@@ -115,10 +116,12 @@ WorkingDirectory=/var/lib/redmine
 Environment=RAILS_ENV=production
 SyslogIdentifier=redmine-unicorn
 PIDFile=/var/lib/redmine/tmp/pids/unicorn.pid
+User=root
+Group=root
 
 ExecStart=/root/.gem/ruby/bin/bundle exec "unicorn_rails -c config/unicorn.rb -E production"
-ExecStop=/usr/bin/kill -QUIT $MAINPID
-ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/usr/bin/kill -QUIT \$MAINPID
+ExecReload=/bin/kill -USR2 \$MAINPID
 
 [Install]
 WantedBy=multi-user.target
@@ -149,6 +152,7 @@ sysctl -p
 yum install -y nginx
 
 curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/nginx-redmine.conf
+mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.org
 mv nginx-redmine.conf /etc/nginx/conf.d/redmine.conf
 systemctl enable nginx.service
 systemctl start nginx.service
