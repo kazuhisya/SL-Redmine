@@ -152,7 +152,7 @@ echo 'net.nf_conntrack_max = 100000' >> /etc/sysctl.conf
 echo 'fs.file-max = 320000' >> /etc/sysctl.conf
 sysctl -p
 
-## Install Nginx and AB tools
+## Install Nginx
 yum install -y nginx
 
 sed -i 's/worker_processes  1;/worker_processes  auto;/' /etc/nginx/nginx.conf
@@ -160,6 +160,14 @@ curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/ngin
 mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.org
 mv nginx-redmine.conf /etc/nginx/conf.d/redmine.conf
 ln -s /var/lib/redmine/public /usr/share/nginx/html/redmine
+
+mv /usr/share/nginx/html/index.html /tmp/index.html
+cat << EOF | tee /usr/share/nginx/html/index.html > /dev/null
+<html>
+<meta http-equiv="Refresh" content="0;URL=/redmine">
+</html>
+EOF
+
 
 systemctl enable nginx.service
 systemctl start nginx.service
