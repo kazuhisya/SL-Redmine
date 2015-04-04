@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# FireWall
+systemctl enable firewalld.service
+systemctl start firewalld.service
+firewall-cmd --add-service=http --zone=public --permanent
+firewall-cmd --add-service=https --zone=public --permanent
+firewall-cmd --reload
+
 # ssh disable password authentication
 sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 systemctl restart sshd.service
@@ -36,24 +43,24 @@ yum -y install ImageMagick ImageMagick-devel ipa-pgothic-fonts
 yum -y install ruby ruby-devel rubygems
 
 
-## mariadb settings
+# MariaDB Settings
 mv /etc/my.cnf /etc/my.cnf.org
 curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/mariadb-my.cnf
 mv mariadb-my.cnf /etc/my.cnf
 
-## Service Enable and Start
+# Service Enable and Start
 systemctl enable mariadb.service
 systemctl start mariadb.service
 
-## create mariadb password
+# Create MariaDB Password
 PASS=`date +%s | sha256sum | base64 | head -c 32`
 echo $PASS > /root/db_password.txt
 
-## Create WordPress DB
+# Create Redmine DB
 /usr/bin/mysql -e "CREATE DATABASE redmine DEFAULT CHARACTER SET utf8;" -D mysql
 /usr/bin/mysql -e "GRANT ALL PRIVILEGES ON redmine.* TO redmine@'%' IDENTIFIED BY '${PASS}';" -D mysql
 
-## mysql_secure_installation
+# mysql_secure_installation
 /usr/bin/mysqladmin drop test -f
 /usr/bin/mysql -e "DELETE FROM mysql.user WHERE User = '';" -D mysql
 /usr/bin/mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');" -D mysql
@@ -62,18 +69,18 @@ echo $PASS > /root/db_password.txt
 /usr/bin/mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${PASS}');" -D mysql
 /usr/bin/mysqladmin flush-privileges -p${PASS}
 
-## Ruby Gems
+# Ruby Gems
 echo "gem: --no-ri --no-rdoc --user-install" > /root/.gemrc
 echo "export PATH=\"\$HOME/.gem/ruby/bin:\$PATH\"" >> /root/.bashrc
 export PATH="$HOME/.gem/ruby/bin:$PATH"
 gem install bundler
 
-## Redmine Download
+# Redmine Download
 curl -OL http://www.redmine.org/releases/redmine-3.0.1.tar.gz
 tar xvf redmine-3.0.1.tar.gz
 mv redmine-3.0.1 /var/lib/redmine
 
-## Redmine Settings
+# Redmine Settings
 cat << EOF | tee /var/lib/redmine/config/database.yml > /dev/null
 production:
   adapter: mysql2
@@ -91,7 +98,7 @@ curl -OL https://raw.githubusercontent.com/kazuhisya/SL-Redmine/master/conf/redm
 mv /var/lib/redmine/config.ru /tmp/config.ru
 mv redmine-config.ru /var/lib/redmine/config.ru
 
-## Redmine Install
+# Redmine Install
 cd /var/lib/redmine
 echo "gem \"unicorn\"" > Gemfile.local
 bundle install --without development test --path vendor/bundle
@@ -99,7 +106,7 @@ bundle exec rake generate_secret_token
 RAILS_ENV=production bundle exec rake db:migrate
 RAILS_ENV=production REDMINE_LANG=ja bundle exec rake redmine:load_default_data
 
-## Unicorn
+# Unicorn Settings
 cat << EOF | tee config/unicorn.rb > /dev/null
 working_directory "/var/lib/redmine"
 pid "/var/lib/redmine/tmp/pids/unicorn.pid"
@@ -134,7 +141,7 @@ EOF
 systemctl enable redmine-unicorn.service
 systemctl start redmine-unicorn.service
 
-## Nginx Repository
+# Nginx Repository
 cat << EOF | tee /etc/yum.repos.d/nginx-mainline.repo > /dev/null
 [nginx-mainline]
 name=nginx mainline repo
@@ -143,7 +150,7 @@ gpgcheck=0
 enabled=1
 EOF
 
-## Hack for Nginx
+# Hack for Nginx
 echo 'net.ipv4.tcp_tw_recycle = 1' >> /etc/sysctl.conf
 echo 'net.ipv4.tcp_tw_reuse = 1' >> /etc/sysctl.conf
 echo 'net.ipv4.tcp_max_syn_backlog = 100000' >> /etc/sysctl.conf
@@ -152,7 +159,7 @@ echo 'net.nf_conntrack_max = 100000' >> /etc/sysctl.conf
 echo 'fs.file-max = 320000' >> /etc/sysctl.conf
 sysctl -p
 
-## Install Nginx
+# Install Nginx
 yum install -y nginx
 
 sed -i 's/worker_processes  1;/worker_processes  auto;/' /etc/nginx/nginx.conf
@@ -186,6 +193,6 @@ $COMMONNAME
 EOF
 openssl x509 -days 3650 -req -signkey /etc/nginx/conf.d/ssl/server.key < /etc/nginx/conf.d/ssl/server.csr > /etc/nginx/conf.d/ssl/server.crt
 
-
+# Nginx Start
 systemctl enable nginx.service
 systemctl start nginx.service
