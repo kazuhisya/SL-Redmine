@@ -192,7 +192,7 @@ $COMMONNAME
 
 EOF
 openssl x509 -days 3650 -req -signkey /etc/nginx/conf.d/ssl/server.key < /etc/nginx/conf.d/ssl/server.csr > /etc/nginx/conf.d/ssl/server.crt
-openssl x509 -in server.crt -inform PEM -out server.der -outform DER
+openssl x509 -in /etc/nginx/conf.d/ssl/server.crt -inform PEM -out /etc/nginx/conf.d/ssl/server.der -outform DER
 
 # Nginx Start
 systemctl enable nginx.service
