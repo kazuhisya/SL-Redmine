@@ -7,9 +7,9 @@ firewall-cmd --add-service=http --zone=public --permanent
 firewall-cmd --add-service=https --zone=public --permanent
 firewall-cmd --reload
 
-# ssh disable password authentication
-sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
-systemctl restart sshd.service
+## ssh disable password authentication
+#sed -i 's/^PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+#systemctl restart sshd.service
 
 # Time zone
 /bin/cp -p /usr/share/zoneinfo/Japan /etc/localtime
