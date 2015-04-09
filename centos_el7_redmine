@@ -177,7 +177,7 @@ EOF
 
 # Make SSL
 mkdir -p  /etc/nginx/conf.d/ssl
-COMMONNAME=`curl -k https://api.service.softlayer.com/rest/v3/SoftLayer_Resource_Metadata/getFullyQualifiedDomainName 2> /dev/null | sed -n -e 's/^"\(.*\)"$/\1/p'`
+COMMONNAME=`hostname -f`
 
 openssl genrsa 2048 > /etc/nginx/conf.d/ssl/server.key
 openssl req -new -sha256 -key /etc/nginx/conf.d/ssl/server.key <<EOF > /etc/nginx/conf.d/ssl/server.csr
