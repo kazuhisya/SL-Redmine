@@ -76,9 +76,9 @@ export PATH="$HOME/.gem/ruby/bin:$PATH"
 gem install bundler
 
 # Redmine Download
-curl -OL http://www.redmine.org/releases/redmine-3.0.1.tar.gz
-tar xvf redmine-3.0.1.tar.gz
-mv redmine-3.0.1 /var/lib/redmine
+curl -OL http://www.redmine.org/releases/redmine-3.0.2.tar.gz
+tar xvf redmine-3.0.2.tar.gz
+mv redmine-3.0.2 /var/lib/redmine
 
 # Redmine Settings
 cat << EOF | tee /var/lib/redmine/config/database.yml > /dev/null
