@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# env
+REDMINE_VERSION="3.1.1"
+
 # FireWall
 systemctl enable firewalld.service
 systemctl start firewalld.service
@@ -76,9 +79,9 @@ export PATH="$HOME/.gem/ruby/bin:$PATH"
 gem install bundler
 
 # Redmine Download
-curl -OL http://www.redmine.org/releases/redmine-3.0.4.tar.gz
-tar xvf redmine-3.0.4.tar.gz
-mv redmine-3.0.4 /var/lib/redmine
+curl -OL http://www.redmine.org/releases/redmine-${REDMINE_VERSION}.tar.gz
+tar xvf redmine-${REDMINE_VERSION}.tar.gz
+mv redmine-${REDMINE_VERSION} /var/lib/redmine
 
 # Redmine Settings
 cat << EOF | tee /var/lib/redmine/config/database.yml > /dev/null
