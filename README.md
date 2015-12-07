@@ -1,2 +1,6 @@
 # SL-Redmine
-Redmine Setup for SoftLayer Provisioning Script
+Redmine Setup for Generic Environment
+
+```bash
+$ git clone -b generic-env https://github.com/kazuhisya/SL-Redmine.git
+```
