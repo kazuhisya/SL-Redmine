@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # env
-REDMINE_VERSION="3.1.3"
+REDMINE_VERSION="3.2.0"
 
 # FireWall
 systemctl enable firewalld.service
