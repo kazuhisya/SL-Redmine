@@ -182,7 +182,7 @@ EOF
 mkdir -p  /etc/nginx/conf.d/ssl
 COMMONNAME=`curl -k https://api.service.softlayer.com/rest/v3/SoftLayer_Resource_Metadata/getFullyQualifiedDomainName 2> /dev/null | sed -n -e 's/^"\(.*\)"$/\1/p'`
 
-openssl genrsa 2048 > /etc/nginx/conf.d/ssl/server.key
+openssl genrsa 2048 -sha256 > /etc/nginx/conf.d/ssl/server.key
 openssl req -new -sha256 -key /etc/nginx/conf.d/ssl/server.key <<EOF > /etc/nginx/conf.d/ssl/server.csr
 JP
 Tokyo
@@ -194,7 +194,7 @@ $COMMONNAME
 
 
 EOF
-openssl x509 -days 3650 -req -signkey /etc/nginx/conf.d/ssl/server.key < /etc/nginx/conf.d/ssl/server.csr > /etc/nginx/conf.d/ssl/server.crt
+openssl x509 -days 3650 -req -sha256 -signkey /etc/nginx/conf.d/ssl/server.key < /etc/nginx/conf.d/ssl/server.csr > /etc/nginx/conf.d/ssl/server.crt
 openssl x509 -in /etc/nginx/conf.d/ssl/server.crt -inform PEM -out /etc/nginx/conf.d/ssl/server.der -outform DER
 
 # Nginx Start
